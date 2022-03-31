@@ -33,7 +33,7 @@ public class GameScreen implements EntryPoint {
         canvas.setCoordinateSpaceHeight(Commons.HEIGHT);
 
         song = Audio.createIfSupported(); //wstęp ostatniego poziomu trudnosci
-        song.setSrc("mywebapp/ultra.wav");
+        song.setSrc("mywebapp/sounds/ultra.wav");
 
         //stworzenie menu trudności i ukrycie go
         setDifficultyMenu();
