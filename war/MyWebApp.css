@@ -27,7 +27,8 @@ height: 1600px;
 outline-style: double;
 background: -moz-linear-gradient(left, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.5) 100%); /* FF3.6-15 */
 background: -webkit-linear-gradient(left, rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 50%,rgba(255,255,255,0.5) 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to right, rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 50%,rgba(255,255,255,0.5) 100%);}
+background: linear-gradient(to right, rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 50%,rgba(255,255,255,0.5) 100%);
+}
 
 .gwt-Button {
 	box-shadow:inset 0px 0px 15px 3px #23395e;
