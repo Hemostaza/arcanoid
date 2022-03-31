@@ -7,7 +7,7 @@ public class Paddle extends Sprite {
     private int dx;
 
     public Paddle() {
-        loadImage("mywebapp/paddle.png");
+        loadImage("mywebapp/images/paddle.png");
         setDimensions();
         x = Commons.INIT_PLAYER_X;
         y = Commons.INIT_PLAYER_Y;

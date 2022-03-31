@@ -40,7 +40,7 @@ public class Arcanoid {
 
         context2d = canvas.getContext2d();
         gameInit();
-        endScreen = new Image("mywebapp/endScreen.png");
+        endScreen = new Image("mywebapp/images/endScreen.png");
 
         //Handlery do ruchu
         canvas.addMouseMoveHandler(new MouseMoveHandler() {
@@ -129,7 +129,7 @@ public class Arcanoid {
     //Start gry
     public void gameStart() {
         inGame = true;
-        sfx.setSrc("mywebapp/start.wav");
+        sfx.setSrc("mywebapp/sounds/start.wav");
         sfx.play();
         //pętla gry
         gameLoop = new Timer() {
@@ -217,12 +217,12 @@ public class Arcanoid {
         if (destroyedBricks == Commons.BRICKS) {
             context2d.fillText("You Win!", x + 75, y + 70);
             context2d.setFont("25px arial");
-            sfx.setSrc("mywebapp/win.wav"); //ustawienie dzwieku wygranej
+            sfx.setSrc("mywebapp/sounds/win.wav"); //ustawienie dzwieku wygranej
         } else {
             //albo przegranej po utracie żyć lub skończocnym czasie
             context2d.fillText("Game Over", x + 48, y + 60);
             context2d.setFont("25px arial");
-            sfx.setSrc("mywebapp/gameOver.wav"); //ustawienie dzwieku przegranej
+            sfx.setSrc("mywebapp/sounds/gameOver.wav"); //ustawienie dzwieku przegranej
 
             if (lives <= 0) {
                 context2d.fillText("Out of lives", x + 115, y + 90);
@@ -242,7 +242,7 @@ public class Arcanoid {
             lives -= 1;
             ball.resetState(); //resetujemy pozycje
             //odgrywamy utraconej piłeczki dźwięk
-            sfx.setSrc("mywebapp/lostBall.wav");
+            sfx.setSrc("mywebapp/sounds/lostBall.wav");
             sfx.play();
         }
         if (ball.isColliding(paddle)) { //jeżeli koliduje z paletką

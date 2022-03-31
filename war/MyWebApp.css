@@ -14,7 +14,7 @@ background: rgb(36,0,0);
 background: linear-gradient(90deg, rgba(36,0,0,1) 20%, rgba(20,0,255,1) 100%);
 }
 canvas{
-background-image: url("mywebapp/bg.png");
+background-image: url("mywebapp/images/bg.png");
 border-width: 10px;
 border-style: double;
 }

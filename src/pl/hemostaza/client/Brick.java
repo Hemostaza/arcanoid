@@ -27,7 +27,7 @@ public class Brick extends Sprite {
         }
         destroyed = false;
         destroyedAudio = Audio.createIfSupported();
-        loadImage("mywebapp/brick.png");
+        loadImage("mywebapp/images/brick.png");
         setDimensions();
     }
 
@@ -42,7 +42,7 @@ public class Brick extends Sprite {
     }
 
     private void setDestroyed(boolean value) {
-        destroyedAudio.setSrc("mywebapp/brickDest.wav");
+        destroyedAudio.setSrc("mywebapp/sounds/brickDest.wav");
         destroyedAudio.play();
         destroyed = value;
     }

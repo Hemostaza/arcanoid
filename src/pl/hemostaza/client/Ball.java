@@ -17,7 +17,7 @@ public class Ball extends Sprite {
         yDir = 0;
         collideAudio = Audio.createIfSupported();
 
-        loadImage("mywebapp/ball.png");
+        loadImage("mywebapp/images/ball.png");
         setDimensions();
         resetState();
     }
@@ -87,7 +87,7 @@ public class Ball extends Sprite {
         xDir = (relativeX / (other.getWidth() * 0.5)); //ustalenie maksymalnego kierunku w osi X (nie mialem lepszego pomyslu ale przy odbiciu krańcem paletki jest ok 65 stopni)
         yDir *= -1; //odbicie w osi Y
 
-        collideAudio.setSrc("mywebapp/colPaddle.wav");
+        collideAudio.setSrc("mywebapp/sounds/colPaddle.wav");
         collideAudio.play();
     }
 
@@ -99,7 +99,7 @@ public class Ball extends Sprite {
         else {
             yDir *= -1; //jeżeli nie w poziomie to odbicie w pionie
         }
-        collideAudio.setSrc("mywebapp/ColBrick.wav");
+        collideAudio.setSrc("mywebapp/sounds/ColBrick.wav");
         collideAudio.play();
     }
 
