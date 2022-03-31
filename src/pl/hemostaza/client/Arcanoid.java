@@ -4,6 +4,7 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 
@@ -11,34 +12,37 @@ import java.util.Date;
 
 public class Arcanoid {
 
-    Ball ball;
-    Paddle paddle;
-    Brick testBrick;
-    Brick[] bricks;
-    Canvas canvas;
-    Context2d context2d;
+    private Ball ball;
+    private Paddle paddle;
+    private Brick[] bricks;
+    private final Context2d context2d;
 
-    int lives;
-    int destroyedBricks = 0;
+    private int lives;
+    private int destroyedBricks;
 
-    boolean inGame = false;
-    boolean ballInGame = false;
+    private boolean ballInGame; //piłka w grze - w ruchu
+    private boolean inGame; //gra aktywna
 
-    Timer gameLoop;
+    private Timer gameLoop; //pętla gry
 
-    Date lastDate;
+    private Date lastDate; //ostatni czas
 
-    Image endScreen;
+    private int timeMilis; //czas do gry w milisekundach
 
-    int timeMilis;
+    private int ballSpeed;
 
-    int ballSpeed;
+    private Image endScreen;
+
+    private Audio sfx = Audio.createIfSupported();
 
 
     public Arcanoid(Canvas canvas) {
 
-        this.canvas = canvas;
         context2d = canvas.getContext2d();
+        gameInit();
+        endScreen = new Image("mywebapp/endScreen.png");
+
+        //Handlery do ruchu
         canvas.addMouseMoveHandler(new MouseMoveHandler() {
             @Override
             public void onMouseMove(MouseMoveEvent mouseMoveEvent) {
@@ -68,149 +72,197 @@ public class Arcanoid {
                 startBall();
             }
         });
-        gameInit();
     }
 
+    public boolean isInGame() {
+        return inGame;
+    }
+
+    //wystartowanie początkowe piłeczki
     private void startBall() {
+        //jeżeli nie jest w grze
         if (!ballInGame) {
             ballInGame = true;
             ball.setYDir(1);
+            //jeżeli przyokazji gra się skończyła to reset gry
             if (!inGame) {
                 gameInit();
+                gameStart();
             }
         }
     }
 
+    //przygotowanie gry
     public void gameInit() {
-        context2d.clearRect(0, 0, Commons.WIDTH, Commons.HEIGHT);
-        timeMilis = Commons.time;
+        context2d.clearRect(0, 0, Commons.WIDTH, Commons.HEIGHT); //czyszczenie
+        timeMilis = Commons.TIME_TO_PLAY; //ustalenie czasu do gry z Commons
         lastDate = new Date();
-        lives = 3;
-        ballInGame = false;
+        lives = 3; //życia do utraty
+        ballInGame = false; //piłeczka nie w grze
+        destroyedBricks = 0; //zniszczonych cegiełek
+
         ball = new Ball();
         ball.setSpeed(ballSpeed);
         paddle = new Paddle();
-        testBrick = new Brick(10, 10, 4);
+        Brick originBirck = new Brick(0, 0, 0);
+
         bricks = new Brick[Commons.BRICKS];
-        destroyedBricks = 0;
-        int brickStartX = (Commons.WIDTH - testBrick.getWidth() * 5) / 2;
-        int k = 0;
-        for (int i = 0; i < 3; i++) {
+        int brickStartX = (Commons.WIDTH - originBirck.getWidth() * 5) / 2; // początek w osi X ukłądania cegiełek tak żeby 5 cegiełek było na środku
+        int k = 0; //stowrzone cegiełki
+        for (int i = 0; i < Commons.BRICKS / 5; i++) {
             for (int j = 0; j < 5; j++) {
-                bricks[k] = new Brick(brickStartX + j * testBrick.getImg().getWidth(), 150 + i * testBrick.getImg().getHeight(), 3 - i);
+                //ustawienie zycia cegiełek
+                int hp = 3 - i;
+                if (hp < 1) hp = 1;
+                bricks[k] = new Brick(brickStartX + j * originBirck.getWidth(), 150 + i * originBirck.getHeight(), hp);
                 k++;
             }
         }
-        inGame = true;
-        endScreen = new Image("mywebapp/endScreen.png");
-        gameStart();
+
     }
 
+    //ustawienie prędkosci pileczki z wybranego poziomu trudnosci
     public void setBallSpeed(int speed) {
         ballSpeed = speed;
     }
 
+    //Start gry
     public void gameStart() {
-
-            gameLoop = new Timer() {
-                @Override
-                public void run() {
-                    update();
-                    render();
-                    updateShowTime();
-                    if (lives <= 0 || timeMilis <= 0 || destroyedBricks == Commons.BRICKS) {
-                        stopGame();
-                        gameLoop.cancel();
-                    }
+        inGame = true;
+        sfx.setSrc("mywebapp/start.wav");
+        sfx.play();
+        //pętla gry
+        gameLoop = new Timer() {
+            @Override
+            public void run() {
+                update();
+                render();
+                updateTime();
+                //warunek zatrzymania gry (ukończenia)
+                if (lives <= 0 || timeMilis <= 0 || destroyedBricks == Commons.BRICKS) {
+                    stopGame();
                 }
-            };
-            gameLoop.scheduleRepeating(1);
-
-    }
-
-    private void render() {
-        context2d.clearRect(0, 0, Commons.WIDTH, Commons.HEIGHT);
-        context2d.setGlobalAlpha(1);
-        ball.renderSprite(context2d);
-        paddle.renderSprite(context2d);
-        for (int i = 0; i < Commons.BRICKS; i++) {
-            if (!bricks[i].isDestroyed()) {
-                bricks[i].renderSprite(context2d);
             }
-        }
-        context2d.setFont("15px arial");
-        context2d.setFillStyle("#ffffff");
-        context2d.fillText("Lives: " + lives, Commons.WIDTH - 60, 16);
+        };
+        gameLoop.scheduleRepeating(1);
+
     }
 
-    void updateShowTime() {
-        Date updatedDate = new Date();
-        long dif = updatedDate.getTime() - lastDate.getTime();
-        context2d.setFillStyle("#ffffff");
-        context2d.setFont("15px arial");
-        timeMilis -= dif;
-        int x = timeMilis / 1000;
-        int seconds = x % 60;
-        x /= 60;
-        int minutes = x % 60;
-        context2d.fillText(minutes + " : " + seconds, 10, 15);
-        lastDate = updatedDate;
-    }
-
+    //aktualizacja gry
     private void update() {
-
         ball.move();
         paddle.move();
         checkCollision();
     }
 
+    //wyświetlenie gry
+    private void render() {
+        context2d.clearRect(0, 0, Commons.WIDTH, Commons.HEIGHT); //czyszczenie ekrany
+        ball.renderSprite(context2d);
+        paddle.renderSprite(context2d);
+        //renderowanie cegiełek jeżeli nie są zniszczone
+        for (int i = 0; i < Commons.BRICKS; i++) {
+            if (!bricks[i].isDestroyed()) {
+                bricks[i].renderSprite(context2d);
+            }
+        }
+        //wyśweitlenie ilości żyć
+        context2d.setFont("15px arial");
+        context2d.setFillStyle("#ffffff");
+        context2d.fillText("Lives: " + lives, Commons.WIDTH - 60, 16);
+        //wyświetlenie tła w css żeby nie renderować za każdym razem kolejnej pętli z orbazkami
+    }
+
+    //aktualizacja czasu gry
+    void updateTime() {
+        Date updatedDate = new Date(); //pobranie nowej daty
+        long dif = updatedDate.getTime() - lastDate.getTime(); //odjęcie starej daty od nowej
+
+        context2d.setFillStyle("#ffffff");
+        context2d.setFont("15px arial");
+
+        timeMilis -= dif; //odjęcie różnicy w czasie
+
+        String time = "";
+        //zmiana z milisekund na sekundy i minuty
+        if (timeMilis < 0) timeMilis = 0;
+        else {
+            int x = timeMilis / 1000;
+            int seconds = x % 60;
+            x /= 60;
+            int minutes = x % 60;
+            if (seconds < 10)
+                time = minutes + " : 0" + seconds; //nie miałem lepszego pomysłu
+            else time = minutes + " : " + seconds;
+            lastDate = updatedDate;
+        }
+        context2d.fillText(time, 10, 15);
+    }
+
+    //zatrzymanie gry
     public void stopGame() {
-        inGame = false;
+
         ballInGame = false;
+        inGame = false;
         gameLoop.cancel();
+
+        //ustalenie pozycji na ekran końcowy
         int x = Commons.WIDTH / 2 - endScreen.getWidth() / 2;
         int y = 300;
         context2d.drawImage(ImageElement.as(endScreen.getElement()), x, y);
         context2d.setFillStyle("#ffffff");
         context2d.setFont("50px arial");
 
+        //w przypadku wygranej jeżeli zniszczoncyh cegiełek jest tylko ile było na poczatku
         if (destroyedBricks == Commons.BRICKS) {
             context2d.fillText("You Win!", x + 75, y + 70);
             context2d.setFont("25px arial");
+            sfx.setSrc("mywebapp/win.wav"); //ustawienie dzwieku wygranej
         } else {
+            //albo przegranej po utracie żyć lub skończocnym czasie
             context2d.fillText("Game Over", x + 48, y + 60);
             context2d.setFont("25px arial");
+            sfx.setSrc("mywebapp/gameOver.wav"); //ustawienie dzwieku przegranej
+
             if (lives <= 0) {
                 context2d.fillText("Out of lives", x + 115, y + 90);
-            } else if (timeMilis < 0) {
-                context2d.fillText("Out of time", x + 110, y + 100);
+            } else if (timeMilis <= 0) {
+                context2d.fillText("Out of time", x + 115, y + 90);
             }
         }
+        sfx.play();
     }
 
+    //sprawdzenie kolizji
     private void checkCollision() {
 
-        ball.isColliding();
-        if (ball.getY() > Commons.EDGE) {
+        //jeżeli piłeczka wypadnie za krawędź
+        if (ball.y > Commons.EDGE) {
             ballInGame = false;
             lives -= 1;
-            ball.resetState();
+            ball.resetState(); //resetujemy pozycje
+            //odgrywamy utraconej piłeczki dźwięk
+            sfx.setSrc("mywebapp/lostBall.wav");
+            sfx.play();
         }
-        if (ball.isColliding(paddle)) {
-            ball.calculateCollisions(paddle);
+        if (ball.isColliding(paddle)) { //jeżeli koliduje z paletką
+            ball.calculateCollisions(paddle); //obliczamy kolizje
         }
+        //dla każdej cegiełki sprawdzamy kolizje (moglem to chyba zrobić na zasadzie listy z ktorej bym usuwał zniszczone cegiełki)
         for (int i = 0; i < Commons.BRICKS; i++) {
+            //jeżeli nie jest zniszczona
             if (!bricks[i].isDestroyed()) {
+                //jeżeli piłeczka z nią koliduje
                 if (ball.isColliding(bricks[i])) {
-                    bricks[i].damage();
+                    bricks[i].damage(); //uszkadzamy cegiełke
                     if (bricks[i].isDestroyed()) {
-                        destroyedBricks += 1;
+                        destroyedBricks += 1; //jak cegiełka sie zniszczyła to ją dodajemy do zniszcozncyh
                     }
+                    //odibjamy piłeczke i rpzerywamy petlę
                     ball.bounce();
                     break;
                 }
             }
         }
-
     }
 }

@@ -5,18 +5,19 @@ import com.google.gwt.media.client.Audio;
 
 public class Brick extends Sprite {
 
-    private boolean destroyed;
-    int hp;
-    private int maxHp;
-    String color;
+    private boolean destroyed; //czy zniszczona
+    private int hp; //aktualne punkty życia cegiełki
+    private int maxHp; //maksymalne punkty życia cegiełki
+    private String color;//color cegiełki
 
-    Audio destroyedAudio;
+    private Audio destroyedAudio;
 
     public Brick(int x, int y, int hp) {
         this.x = x;
         this.y = y;
         this.hp = hp;
         maxHp = hp;
+        //ustalenie jaki kolor ma cegiełka
         if (maxHp == 3) {
             color = "Red";
         } else if (maxHp == 2) {
@@ -30,27 +31,30 @@ public class Brick extends Sprite {
         setDimensions();
     }
 
-    void damage() {
+    //uszkodzenie cegiełki i jej zniszczenie jeżeli punkty życia osiągną 0
+    public void damage() {
         hp -= 1;
         if (hp == 0) setDestroyed(true);
     }
 
-    boolean isDestroyed() {
+    public boolean isDestroyed() {
         return destroyed;
     }
 
-    void setDestroyed(boolean value) {
+    private void setDestroyed(boolean value) {
         destroyedAudio.setSrc("mywebapp/brickDest.wav");
         destroyedAudio.play();
         destroyed = value;
     }
 
     public void renderSprite(Context2d context2d) {
+        //wyrenderowanie głównej grafiki
         super.renderSprite(context2d);
-        context2d.setGlobalAlpha((double) hp / maxHp * 0.5);
-        context2d.setFillStyle(color);
-        context2d.fillRect(x + 1, y + 1, getWidth() - 1, getHeight() - 1);
-        context2d.setGlobalAlpha(1);
+        //ustalenie stylu rysowanego prostokąta
+        context2d.setGlobalAlpha((double) hp / maxHp * 0.5); //transparentność przykrywajacego prostokata
+        context2d.setFillStyle(color); //kolor przykrywającego prostokąta
+        context2d.fillRect(x + 1, y + 1, getWidth() - 1, getHeight() - 1); //przykrywający prostokąt na wcześniej wyrenderowanej cegiełce
+        context2d.setGlobalAlpha(1); //powrot do braku transprantności
     }
 
 }

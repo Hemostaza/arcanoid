@@ -5,41 +5,42 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.user.client.ui.Image;
 
 public class Sprite {
-    double x;
-    double y;
-    private int imgWidth;
-    private int imgHeight;
+    //pozycja na planszy
+    protected double x;
+    protected double y;
+    //wymiary sprita
+    private int width;
+    private int height;
 
-    protected Image image;
+    //obrazek
+    private Image image;
 
-    public double getX() {
-        return x;
-    }
-    public double getY() {
-        return y;
-    }
+//    public double getX() {
+//        return x;
+//    }
+//    public double getY() {
+//        return y;
+//    }
 
     public int getWidth() {
-        return image.getWidth();
+        return width;
     }
 
     public int getHeight() {
-        return image.getHeight();
+        return height;
     }
 
-    public Image getImg() {
-        return image;
-    }
-
-    public void loadImage(String src){
+    //załadowanie grafiki
+    public void loadImage(String src) {
         image = new Image(src);
     }
 
+    //ustalenie wymiarów na podstawie grafiki
     void setDimensions() {
-        imgWidth = image.getWidth();
-        imgHeight = image.getHeight();
+        width = image.getWidth();
+        height = image.getHeight();
     }
-
+    //wysweitlenie grafiki
     public void renderSprite(Context2d context2d) {
         context2d.drawImage(ImageElement.as(image.getElement()), x, y);
     }

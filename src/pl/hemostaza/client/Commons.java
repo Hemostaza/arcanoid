@@ -1,10 +1,10 @@
 package pl.hemostaza.client;
 
 public interface Commons {
-    int WIDTH = 400; //szerokosc gry
-    int HEIGHT = 600; //wysokosc gry
+    int WIDTH = 400; //szerokosc planszy
+    int HEIGHT = 600; //wysokosc planszy
     int EDGE = 580; //miejsce gie piłka umiera
-    int BRICKS= 15;
+    int BRICKS= 15; //ilośc cegiełek na planszy
     //poczatkowe polozenie poaletki w osiach x i y
     int INIT_PLAYER_X = 150;
     int INIT_PLAYER_Y = 550;
@@ -12,8 +12,7 @@ public interface Commons {
     int INIT_BALL_X = 200;
     int INIT_BALL_Y = 355;
     //Czas na gre w milisekundach
-    int time = 120000;
-    //prędkosc piłki
-    double SPEEED = 1.5;
+    int TIME_TO_PLAY = 120000;
+
 
 }
