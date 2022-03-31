@@ -1,56 +1,32 @@
 package pl.hemostaza.client;
 
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.media.client.Audio;
 
 public class Ball extends Sprite {
     private double xdir;
     private double ydir;
-    //private int speed;
+    private double speed;
 
+    Audio collideAudio;
+    Audio colOther;
 
-    double relativeX;
-    double relativeY;
-    boolean colHorizontal;
+    boolean colInHorizontal;
 
     public Ball() {
-        createBall();
-    }
+        xdir = 0;
+        ydir = 0;
+        colInHorizontal=false;
+        collideAudio = Audio.createIfSupported();
+        colOther = Audio.createIfSupported();
 
-    private void createBall() {
-        xdir = 1;
-        ydir = -1;
-        //speed = Commons.SPEEED;
-
-        loadImage();
-        getImageDimensions();
+        loadImage("mywebapp/ball.png");
+        setDimensions();
         resetState();
     }
 
-    private void loadImage() {
-        Image image = new Image("mywebapp/ball.png");
-        img = image;
-    }
-
     void move() {
-        x += Commons.SPEEED * xdir;
-        y += Commons.SPEEED * ydir;
-
-        if (x <= 0) {
-            setXDir(xdir * -1);
-        }
-
-        if (x >= Commons.WIDTH - getImgWidth()) {
-            setXDir(xdir * -1);
-        }
-
-        if (y <= 0) {
-            setYDir(getYDir() * -1);
-        }
-        if (y >= Commons.HEIGHT - getImgWidth()) {
-            setYDir(getYDir() * -1);
-        }
+        x += speed * xdir;
+        y += speed * ydir;
     }
 
     public void setYDir(double y) {
@@ -69,73 +45,64 @@ public class Ball extends Sprite {
         return xdir;
     }
 
-    private void resetState() {
+    public void resetState() {
+        xdir=0;
+        ydir=0;
         x = Commons.INIT_BALL_X;
         y = Commons.INIT_BALL_Y;
     }
 
+    public void isColliding() {
+        if (x<= 0 || x>= Commons.WIDTH - getWidth()) {
+            setXDir(xdir * -1);
+            colOther.setSrc("mywebapp/ColBrick.wav");
+            colOther.play();
+        }
+        if (y <= 0) {
+            setYDir(getYDir() * -1);
+            colOther.setSrc("mywebapp/ColBrick.wav");
+            colOther.play();
+        }
+    }
+
     public boolean isColliding(Sprite other) {
 
-//        double otherCenterPosX = other.getX() + other.getImgWidth()/2;
-//        double otherCenterPosY = other.getY() + other.getImgHeight()/2;
-//        double thisCenterPosX = this.getX() + this.getImgWidth()/2;
-//        double thisCenterPosY = this.getY() + this.getImgHeight()/2;
-        //trzeba to napsiac elpiej ale narazie chuj z tym
-        //kolizja w osi Y
-        if ((this.getDownY() >= other.y && this.y <= other.y)
-                || (this.y <= other.getDownY() && this.getDownY() >= other.getDownY())) {
-            colHorizontal = false;
-            //czy krawedzie this sa w other
-            if (this.x >= other.x && this.x <= other.getRightX()) {
-
-                return true;
-            }
-            if (this.getRightX() >= other.x && this.getRightX() <= other.getRightX()) {
-
-                return true;
-            }
-
+        if (x + getWidth() + xdir *speed > other.x && x + xdir*speed < other.x + other.getWidth()
+                && y + getHeight() > other.y && y < other.y + other.getHeight()) {
+            colInHorizontal=true;
+            return true;
         }
-        //kolizja w osi X
-        if ((this.getRightX() >= other.x && this.x <= other.x)
-                || (this.x <= other.getRightX() && this.getRightX() >= other.getRightX())) {
-            colHorizontal = true;
-            if (this.y >= other.y && this.y <= other.getDownY()) {
-
-                return true;
-            }
-            if (this.getDownY() >= other.y && this.getDownY() <= other.getDownY()) {
-
-                return true;
-            }
+        if (x + getWidth() > other.x && x < other.x + other.getWidth()
+                && y + getHeight() + ydir*speed > other.y && y + ydir *speed< other.y +  other.getHeight()) {
+            colInHorizontal=false;
+            return true;
         }
-
         return false;
+
     }
 
-    public void calculateRelativePos(Sprite other) {
-        double otherCenterPosX = other.getX() + other.getImgWidth() / 2;
-        double otherCenterPosY = other.getY() + other.getImgHeight() / 2;
-        double thisCenterPosX = this.getX() + this.getImgWidth() / 2;
-        double thisCenterPosY = this.getY() + this.getImgHeight() / 2;
-        relativeX = thisCenterPosX - otherCenterPosX;
-        relativeY = thisCenterPosY - otherCenterPosY;
-    }
+    public void calculateCollisions(Paddle other) {
 
-    public void collisions() {
-        double xDir = relativeX / getImgWidth();
-        if (xDir > 1) xDir = 1;
-        if (xDir < -1) xDir = -1;
-        double yDir = relativeY / getImgHeight();
-        if (yDir > 1) yDir = 1;
-        if (yDir < -1) yDir = -1;
+        double otherCenterPosX = other.getX() + other.getWidth() / 2;
+        double thisCenterPosX = getX() + getWidth() / 2;
+        double relativeX = thisCenterPosX - otherCenterPosX;
+
+        double xDir = ( relativeX / (other.getWidth()*0.5));
         setXDir(xDir);
-        setYDir(yDir);
+        ydir *= -1;
+        collideAudio.setSrc("mywebapp/colPaddle.wav");
+        collideAudio.play();
     }
 
-    public void renderSprite(Context2d context2d) {
-        //context2d.setGlobalAlpha(1);
-        super.renderSprite(context2d);
+    public void bounce() {
+        if(colInHorizontal)xdir*=-1;
+        else ydir*=-1;
+        collideAudio.setSrc("mywebapp/ColBrick.wav");
+        collideAudio.play();
+    }
+
+    void setSpeed(int speed){
+        this.speed=speed;
     }
 
 }

@@ -1,18 +1,13 @@
 package pl.hemostaza.client;
 
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.ui.Image;
 
 public class Paddle extends Sprite {
     private int dx;
 
     public Paddle() {
-        createPaddle();
-    }
-
-    private void createPaddle() {
-        loadImage();
-        getImageDimensions();
+        loadImage("mywebapp/paddle.png");
+        setDimensions();
         resetState();
     }
 
@@ -21,18 +16,13 @@ public class Paddle extends Sprite {
         y = Commons.INIT_PLAYER_Y;
     }
 
-    private void loadImage() {
-        Image image = new Image("mywebapp/paddle.png");
-        img = image;
-    }
-
     public void move() {
-        x += dx;
+        x += dx * 2;
         if (x <= 0) {
             x = 0;
         }
-        if (x >= Commons.WIDTH - img.getWidth()) {
-            x = Commons.WIDTH - img.getWidth();
+        if (x >= Commons.WIDTH - image.getWidth()) {
+            x = Commons.WIDTH - image.getWidth();
         }
     }
 
@@ -54,6 +44,10 @@ public class Paddle extends Sprite {
         if (key == KeyCodes.KEY_RIGHT) {
             dx = 0;
         }
+    }
+
+    void moveToMouse(MouseMoveEvent event){
+        x = event.getX()-image.getWidth()/2;
     }
 
 }

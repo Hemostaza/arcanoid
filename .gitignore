@@ -1,2 +1,3 @@
 # Project exclude paths
 /war/WEB-INF/classes/
+/src/pl/hemostaza/client/Board.java

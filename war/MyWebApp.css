@@ -9,8 +9,8 @@ h1 {
   margin: 40px 0px 70px;
   text-align: center;
 }
-.dupa{
-opacity: 0.5;
+canvas{
+background-image: url("mywebapp/bg.png");
 }
 
 .backgroundPanel{
